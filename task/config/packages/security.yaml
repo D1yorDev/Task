@@ -1,0 +1,42 @@
+security:
+    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+    # https://symfony.com/doc/current/security/authenticator_manager.html
+    enable_authenticator_manager: true
+    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+    providers:
+        users:
+            entity:
+                class: App\Entity\User
+                property: email
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        # api/users/create endpoint'iga POST orqali murojaat qilinganda - token soralmasin
+        user_create:
+            pattern: ^/api/users/create
+            methods:
+                - post
+            security: false
+
+        main:
+            stateless: true
+            provider: users
+            json_login:
+                check_path: /api/users/auth # The name in routes.yaml is enough for mapping
+                username_path: email
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            jwt: ~
+
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
+    access_control:
+#        - {path: ^/api/.+, role: IS_AUTHENTICATED_FULLY}
+#        - {path: ^/api, role: PUBLIC_ACCESS}
+        # - { path: ^/admin, roles: ROLE_ADMIN }
+        # - { path: ^/profile, roles: ROLE_USER }
